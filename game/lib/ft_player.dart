@@ -6,9 +6,10 @@ import 'ft_game.dart';
 
 class FtPlayer extends SpriteComponent
     with KeyboardHandler, CollisionCallbacks, HasGameReference<FtGame> {
-  FtPlayer({required super.position})
+  FtPlayer({required super.position, required this.game})
       : super(size: Vector2.all(64), anchor: Anchor.center);
 
+  final FtGame game;
   final Vector2 velocity = Vector2.zero();
   final double moveSpeed = 200;
   int horizontalDirection = 0;
@@ -48,6 +49,8 @@ class FtPlayer extends SpriteComponent
   void update(double dt) {
     position.add(Vector2(horizontalDirection * moveSpeed * dt,
         verticalDirection * moveSpeed * dt));
+    game.websocket.sendMessage(
+        '{"type": "move", "x": ${position.x}, "y": ${position.y}}');
     super.update(dt);
   }
 

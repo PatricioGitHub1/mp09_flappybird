@@ -1,8 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
-import 'app_data.dart';
 import 'app.dart';
 
 void main() async {
@@ -18,14 +16,9 @@ void main() async {
     print(e);
   }
 
-
-
   // Define the app as a ChangeNotifierProvider
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppData(),
-      child: const App(),
-    ),
+    const App(),
   );
 }
 
