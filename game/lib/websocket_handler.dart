@@ -61,8 +61,10 @@ class WebSocketHandler {
     if (connectionStatus != ConnectionStatus.connected) {
       return;
     }
-    print("Sending message: $message");
-    _socketClient!.sink.add(jsonEncode(message));
+    if (kDebugMode) {
+      print("Sending message: $message");
+    }
+    _socketClient!.sink.add(message);
   }
 
   disconnectFromServer() async {

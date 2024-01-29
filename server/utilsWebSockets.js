@@ -5,10 +5,10 @@ const { v4: uuidv4 } = require('uuid')
 
 class Obj {
 
-    init (httpServer, port) {      
+    init(httpServer, port) {
 
         // Define empty callbacks
-        this.onConnection = (socket, id) => {}
+        this.onConnection = (socket, id) => { }
         this.onMessage = (socket, id, obj) => { }
         this.onClose = (socket, id) => { }
 
@@ -21,19 +21,18 @@ class Obj {
         this.ws.on('connection', (ws) => { this.newConnection(ws) })
     }
 
-    end () {
+    end() {
         this.ws.close()
     }
 
     // A websocket client connects
-    newConnection (con) {
+    newConnection(con) {
 
         console.log("Client connected")
 
         // Add client to the clients list
         const id = uuidv4().substring(0, 5)
-        const color = Math.floor(Math.random() * 360)
-        const metadata = { id, color }
+        const metadata = { id }
         this.socketsClients.set(con, metadata)
 
         // Send clients list to everyone
@@ -44,23 +43,23 @@ class Obj {
         // What to do when a client is disconnected
         con.on("close", () => {
             this.closeConnection(con)
-            this.socketsClients.delete(con)  
+            this.socketsClients.delete(con)
         })
 
         // What to do when a client message is received
-        con.on('message', (bufferedMessage) => { this.newMessage(con, id, bufferedMessage)})
+        con.on('message', (bufferedMessage) => { this.newMessage(con, id, bufferedMessage) })
     }
 
-    closeConnection (con) {
+    closeConnection(con) {
         if (this.onClose && typeof this.onClose === "function") {
             var id = this.socketsClients.get(con).id
             this.onClose(con, id)
         }
     }
 
- 
+
     // Send a message to all websocket clients
-    broadcast (msg) {
+    broadcast(msg) {
         this.ws.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(msg)
@@ -69,14 +68,23 @@ class Obj {
     }
 
     // A message is received from a websocket client
-    newMessage (ws, id, bufferedMessage) {
+    newMessage(ws, id, bufferedMessage) {
         var messageAsString = bufferedMessage.toString()
         if (this.onMessage && typeof this.onMessage === "function") {
             this.onMessage(ws, id, messageAsString)
         }
     }
 
-    getClients() {
+    getClientData(id) {
+        for (let [client, metadata] of this.socketsClients.entries()) {
+            if (metadata.id === id) {
+                return metadata;
+            }
+        }
+        return null;
+    }
+
+    getClientsIds() {
         let clients = [];
         this.socketsClients.forEach((value, key) => {
             clients.push(value.id);
@@ -84,15 +92,13 @@ class Obj {
         return clients;
     }
 
-    getClientById(id) {
+    getClientsData() {
+        let clients = [];
         for (let [client, metadata] of this.socketsClients.entries()) {
-            if (metadata.id === id) {
-                return client;
-            }
+            clients.push(metadata);
         }
-        return null;
+        return clients;
     }
-    
 }
 
 module.exports = Obj

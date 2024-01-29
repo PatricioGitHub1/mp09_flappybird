@@ -1,5 +1,5 @@
 const express = require('express')
-const shadowsObj = require('./utilsShadows.js')
+const gameLoop = require('./utilsGameLoop.js')
 const webSockets = require('./utilsWebSockets.js')
 const debug = true
 
@@ -14,10 +14,11 @@ const debug = true
         - Welcome message       { "type": "welcome", "value": "Welcome to the server", "id", "clientId" }
         
     From server to everybody (broadcast):
-        - New Client            { "type": "newClient", "id": "clientId" }
+        - All clients data      { "type": "data", "data": "clientsData" }
 */
 
 var ws = new webSockets()
+var gLoop = new gameLoop()
 
 // Start HTTP server
 const app = express()
@@ -39,6 +40,7 @@ function shutDown() {
   console.log('Received kill signal, shutting down gracefully');
   httpServer.close()
   ws.end()
+  gLoop.stop()
   process.exit(0);
 }
 
@@ -63,15 +65,19 @@ ws.onConnection = (socket, id) => {
 }
 
 ws.onMessage = (socket, id, msg) => {
+  if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 25)}...`)
+
+  let clientData = ws.getClientData(id)
+  if (clientData == null) return
+
   let obj = JSON.parse(msg)
-  if (debug) console.log(`New message:  ${JSON.stringify(obj.type)}`)
   switch (obj.type) {
     case "name":
-      socket.clientName = obj.value
+      clientData.clientName = obj.value
       break;
     case "move":
-      socket.clientX = obj.x
-      socket.clientY = obj.y
+      clientData.clientX = obj.x
+      clientData.clientY = obj.y
       break
   }
 }
@@ -85,4 +91,16 @@ ws.onClose = (socket, id) => {
     from: "server",
     id: id
   }))
+}
+
+gLoop.init();
+gLoop.run = (fps) => {
+  // Aquest mètode s'intenta executar 30 cops per segon
+
+  let clientsData = ws.getClientsData()
+
+  // Gestionar aquí la partida, estats i final
+
+  // Send game status data to everyone
+  ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))
 }

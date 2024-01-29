@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -27,20 +29,15 @@ class FtGame extends FlameGame
   }
 
   @override
-  void update(double dt) {
-    super.update(dt);
-  }
-
-  @override
   Color backgroundColor() {
     return const Color.fromARGB(255, 173, 223, 247);
   }
 
   void initializeGame({required bool loadHud}) {
-    websocket = WebSocketHandler();
-    websocket.connectToServer("localhost", 8888, serverMessageHandler);
-    _player = FtPlayer(
-        position: Vector2((canvasSize.x / 2), (canvasSize.y / 2)), game: this);
+    // Initialize websocket
+    initializeWebSocket();
+    _player =
+        FtPlayer(position: Vector2((canvasSize.x / 2), (canvasSize.y / 2)));
     world.add(_player);
   }
 
@@ -52,5 +49,26 @@ class FtGame extends FlameGame
     if (kDebugMode) {
       print("Message received: $message");
     }
+  }
+
+  void initializeWebSocket() {
+    websocket = WebSocketHandler();
+    websocket.connectToServer("localhost", 8888, serverMessageHandler);
+
+    final List<String> randomNames = [
+      "Alice",
+      "Bob",
+      "Charlie",
+      "David",
+      "Eva",
+      "Frank",
+      "Grace",
+      "Hank",
+      "Ivy",
+      "Jack"
+    ];
+    final random = Random();
+    final randomName = randomNames[random.nextInt(randomNames.length)];
+    websocket.sendMessage('{"type": "name", "value": "$randomName"}');
   }
 }
