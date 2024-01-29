@@ -7,7 +7,7 @@ const debug = true
     WebSockets server, example of messages:
 
     From client to server:
-        - Client name           { "type": "name", "value": "clientName" }
+        - Client init           { "type": "init", "name": "clientName", "color": "0x000000" }
         - Player movement       { "type": "move", "x": 0, "y": 0 }
 
     From server to client:
@@ -65,15 +65,16 @@ ws.onConnection = (socket, id) => {
 }
 
 ws.onMessage = (socket, id, msg) => {
-  if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 25)}...`)
+  if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 32)}...`)
 
   let clientData = ws.getClientData(id)
   if (clientData == null) return
 
   let obj = JSON.parse(msg)
   switch (obj.type) {
-    case "name":
-      clientData.clientName = obj.value
+    case "init":
+      clientData.clientName = obj.name
+      clientData.clientColor = obj.color
       break;
     case "move":
       clientData.clientX = obj.x
@@ -100,6 +101,7 @@ gLoop.run = (fps) => {
   let clientsData = ws.getClientsData()
 
   // Gestionar aquí la partida, estats i final
+  //console.log(clientsData)
 
   // Send game status data to everyone
   ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))

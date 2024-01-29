@@ -61,7 +61,7 @@ class WebSocketHandler {
       return;
     }
     if (kDebugMode) {
-      print("Sending message: $message");
+      // print("Sending message: $message");
     }
     _socketClient!.sink.add(message);
   }

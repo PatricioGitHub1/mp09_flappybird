@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
@@ -6,8 +8,11 @@ import 'ft_game.dart';
 
 class FtPlayer extends SpriteComponent
     with KeyboardHandler, CollisionCallbacks, HasGameReference<FtGame> {
-  FtPlayer({required super.position})
+  FtPlayer({required this.id, required super.position, required this.color})
       : super(size: Vector2.all(64), anchor: Anchor.center);
+
+  String id = "";
+  Color color = const Color.fromARGB(255, 175, 175, 175);
 
   Vector2 previousPosition = Vector2.zero();
   final Vector2 velocity = Vector2.zero();
@@ -17,6 +22,7 @@ class FtPlayer extends SpriteComponent
 
   @override
   Future<void> onLoad() async {
+    priority = 1; // Dibuixar-lo per sobre de tot
     sprite = await Sprite.load('player.png');
     size = Vector2.all(64);
     add(CircleHitbox());
@@ -67,5 +73,18 @@ class FtPlayer extends SpriteComponent
     }
 
     super.onCollision(intersectionPoints, other);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    // Preparar el Paint amb color i opacitat
+    final paint = Paint()
+      ..colorFilter =
+          ColorFilter.mode(color.withOpacity(0.5), BlendMode.srcATop)
+      ..filterQuality = FilterQuality.high;
+
+    // Renderitzar el sprite amb el Paint personalitzat
+    sprite?.render(canvas, size: size, overridePaint: paint);
   }
 }

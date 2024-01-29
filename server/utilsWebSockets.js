@@ -31,7 +31,7 @@ class Obj {
         console.log("Client connected")
 
         // Add client to the clients list
-        const id = uuidv4().substring(0, 5)
+        const id = "C" + uuidv4().substring(0, 5).toUpperCase()
         const metadata = { id }
         this.socketsClients.set(con, metadata)
 
