@@ -2,7 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'ft_game.dart';
-import 'ft_main_view.dart';
+import 'ft_main_overlay.dart';
 
 // Main application widget
 class App extends StatefulWidget {
@@ -14,7 +14,6 @@ class App extends StatefulWidget {
 
 // Main application state
 class AppState extends State<App> {
-
   // Definir el contingut del widget 'App'
   @override
   Widget build(BuildContext context) {
@@ -22,9 +21,9 @@ class AppState extends State<App> {
     return GameWidget<FtGame>.controlled(
       gameFactory: FtGame.new,
       overlayBuilderMap: {
-        'MainView': (_, game) => FtMainView(game: game),
+        'MainOverlay': (_, game) => FtMainOverlay(game: game),
       },
-      initialActiveOverlays: const ['MainView'],
+      initialActiveOverlays: const ['MainOverlay'],
     );
   }
 }
