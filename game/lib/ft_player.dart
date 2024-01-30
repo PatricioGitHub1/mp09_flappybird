@@ -15,7 +15,9 @@ class FtPlayer extends SpriteComponent
   Color color = const Color.fromARGB(255, 175, 175, 175);
 
   Vector2 previousPosition = Vector2.zero();
-  final Vector2 velocity = Vector2.zero();
+  int previousHorizontalDirection = 0;
+  int previousVerticalDirection = 0;
+
   final double moveSpeed = 200;
   int horizontalDirection = 0;
   int verticalDirection = 0;
@@ -57,10 +59,16 @@ class FtPlayer extends SpriteComponent
         verticalDirection * moveSpeed * dt));
 
     Vector2 newPosition = center.clone();
-    if (newPosition != previousPosition) {
+    if (newPosition != previousPosition ||
+        horizontalDirection != previousHorizontalDirection ||
+        verticalDirection != previousVerticalDirection) {
+      // Enviar les dades al servidor, només si s'han produït canvis
       game.websocket.sendMessage(
-          '{"type": "move", "x": ${position.x}, "y": ${position.y}}');
+          '{"type": "move", "x": ${position.x}, "y": ${position.y}, "horizontalDirection": $horizontalDirection, "verticalDirection": $verticalDirection}');
+
       previousPosition.setFrom(newPosition);
+      previousHorizontalDirection = horizontalDirection;
+      previousVerticalDirection = verticalDirection;
     }
 
     super.update(dt);

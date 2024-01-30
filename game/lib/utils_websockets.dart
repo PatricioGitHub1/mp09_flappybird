@@ -8,7 +8,7 @@ enum ConnectionStatus {
   connected,
 }
 
-class WebSocketHandler {
+class WebSocketsHandler {
   late Function _callback;
   String ip = "localhost";
   String port = "8888";

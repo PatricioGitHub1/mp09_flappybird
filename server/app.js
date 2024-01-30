@@ -7,7 +7,7 @@ const debug = true
     WebSockets server, example of messages:
 
     From client to server:
-        - Client init           { "type": "init", "name": "clientName", "color": "0x000000" }
+        - Client init           { "type": "init", "name": "name", "color": "0x000000" }
         - Player movement       { "type": "move", "x": 0, "y": 0 }
 
     From server to client:
@@ -73,12 +73,14 @@ ws.onMessage = (socket, id, msg) => {
   let obj = JSON.parse(msg)
   switch (obj.type) {
     case "init":
-      clientData.clientName = obj.name
-      clientData.clientColor = obj.color
+      clientData.name = obj.name
+      clientData.color = obj.color
       break;
     case "move":
-      clientData.clientX = obj.x
-      clientData.clientY = obj.y
+      clientData.x = obj.x
+      clientData.y = obj.y
+      clientData.horizontalDirection = obj.horizontalDirection
+      clientData.verticalDirection = obj.verticalDirection
       break
   }
 }

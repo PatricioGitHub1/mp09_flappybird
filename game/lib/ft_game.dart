@@ -9,13 +9,13 @@ import 'package:flutter/material.dart';
 
 import 'ft_opponent.dart';
 import 'ft_player.dart';
-import 'websocket_handler.dart';
+import 'utils_websockets.dart';
 
 class FtGame extends FlameGame
     with HasCollisionDetection, HasKeyboardHandlerComponents {
   FtGame();
 
-  late WebSocketHandler websocket;
+  late WebSocketsHandler websocket;
   FtPlayer? _player;
   final List<FtOpponent> _opponents = [];
 
@@ -45,7 +45,7 @@ class FtGame extends FlameGame
   }
 
   void initializeWebSocket() {
-    websocket = WebSocketHandler();
+    websocket = WebSocketsHandler();
     websocket.connectToServer("localhost", 8888, serverMessageHandler);
   }
 
@@ -107,24 +107,32 @@ class FtGame extends FlameGame
 
     for (var opponentData in opponentsData) {
       final id = opponentData['id'];
+      String clientColor = "0x00000000";
       double clientX = -100.0;
       double clientY = -100.0;
-      String clientColor = "0x00000000";
+      int clientHorizontalDirection = 0;
+      int clientVerticalDirection = 0;
 
-      if (id == _player?.id || opponentData['clientName'] == null) {
+      if (id == _player?.id || opponentData['name'] == null) {
         // No tenim nom, no podem crear l'oponent
         // (o bé és el nostre player que encara no ha informat el nom al servidor)
         continue;
       }
 
-      if (opponentData['clientColor'] != null) {
-        clientColor = opponentData['clientColor'];
+      if (opponentData['color'] != null) {
+        clientColor = opponentData['color'];
       }
-      if (opponentData['clientX'] != null) {
-        clientX = opponentData['clientX'].toDouble();
+      if (opponentData['x'] != null) {
+        clientX = opponentData['x'].toDouble();
       }
-      if (opponentData['clientY'] != null) {
-        clientY = opponentData['clientY'].toDouble();
+      if (opponentData['y'] != null) {
+        clientY = opponentData['y'].toDouble();
+      }
+      if (opponentData['horizontalDirection'] != null) {
+        clientHorizontalDirection = opponentData['horizontalDirection'].toInt();
+      }
+      if (opponentData['verticalDirection'] != null) {
+        clientVerticalDirection = opponentData['verticalDirection'].toInt();
       }
 
       if (!currentOpponentIds.contains(id)) {
@@ -142,8 +150,10 @@ class FtGame extends FlameGame
         // Actualitzar la posició de l'oponent existent
         var opponent = _opponents.firstWhere((op) => op.id == id);
         if (opponent.id != _player?.id) {
+          // opponent.color = hexToColor(clientColor);
           opponent.position = Vector2(clientX, clientY);
-          //opponent.color = hexToColor(clientColor);
+          opponent.horizontalDirection = clientHorizontalDirection;
+          opponent.verticalDirection = clientVerticalDirection;
         }
       }
     }
