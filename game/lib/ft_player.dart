@@ -67,8 +67,6 @@ class FtPlayer extends SpriteComponent
           '{"type": "move", "x": ${position.x}, "y": ${position.y}, "horizontalDirection": $horizontalDirection, "verticalDirection": $verticalDirection}');
 
       previousPosition.setFrom(newPosition);
-      previousHorizontalDirection = horizontalDirection;
-      previousVerticalDirection = verticalDirection;
     }
 
     super.update(dt);

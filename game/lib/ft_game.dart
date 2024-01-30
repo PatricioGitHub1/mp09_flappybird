@@ -19,6 +19,9 @@ class FtGame extends FlameGame
   FtPlayer? _player;
   final List<FtOpponent> _opponents = [];
 
+  DateTime? lastUpdateTime;
+  double serverUpdateInterval = 0; // En segons
+
   @override
   Future<void> onLoad() async {
     //debugMode = true; // Uncomment to see the bounding boxes
@@ -105,13 +108,19 @@ class FtGame extends FlameGame
       return;
     }
 
+    DateTime now = DateTime.now();
+    if (lastUpdateTime != null) {
+      serverUpdateInterval =
+          now.difference(lastUpdateTime!).inMilliseconds / 1000.0;
+    }
+    lastUpdateTime = now;
+    var interpolationSpeed = 1 / serverUpdateInterval;
+
     for (var opponentData in opponentsData) {
       final id = opponentData['id'];
       String clientColor = "0x00000000";
       double clientX = -100.0;
       double clientY = -100.0;
-      int clientHorizontalDirection = 0;
-      int clientVerticalDirection = 0;
 
       if (id == _player?.id || opponentData['name'] == null) {
         // No tenim nom, no podem crear l'oponent
@@ -128,12 +137,6 @@ class FtGame extends FlameGame
       if (opponentData['y'] != null) {
         clientY = opponentData['y'].toDouble();
       }
-      if (opponentData['horizontalDirection'] != null) {
-        clientHorizontalDirection = opponentData['horizontalDirection'].toInt();
-      }
-      if (opponentData['verticalDirection'] != null) {
-        clientVerticalDirection = opponentData['verticalDirection'].toInt();
-      }
 
       if (!currentOpponentIds.contains(id)) {
         // Afegir l'oponent nou
@@ -147,14 +150,11 @@ class FtGame extends FlameGame
           world.add(newOpponent);
         }
       } else {
-        // Actualitzar la posició de l'oponent existent
+        // Definir la posició fins a la que s'ha de interpolar la posició de l'oponent
         var opponent = _opponents.firstWhere((op) => op.id == id);
-        if (opponent.id != _player?.id) {
-          // opponent.color = hexToColor(clientColor);
-          opponent.position = Vector2(clientX, clientY);
-          opponent.horizontalDirection = clientHorizontalDirection;
-          opponent.verticalDirection = clientVerticalDirection;
-        }
+        opponent.interpolationSpeed = interpolationSpeed;
+        opponent.targetPosition = Vector2(clientX, clientY);
+        // opponent.color = hexToColor(clientColor);
       }
     }
 

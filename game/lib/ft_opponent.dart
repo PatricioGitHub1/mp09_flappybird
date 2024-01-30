@@ -11,9 +11,8 @@ class FtOpponent extends SpriteComponent with HasGameReference<FtGame> {
   String id = "";
   Color color = const Color.fromARGB(255, 0, 0, 0);
 
-  final double moveSpeed = 200;
-  int horizontalDirection = 0;
-  int verticalDirection = 0;
+  Vector2 targetPosition = Vector2.zero(); // Posició objectiu (la del servidor)
+  double interpolationSpeed = 10; // Velocitat d'interpolació
 
   @override
   Future<void> onLoad() async {
@@ -25,8 +24,12 @@ class FtOpponent extends SpriteComponent with HasGameReference<FtGame> {
 
   @override
   void update(double dt) {
-    center.add(Vector2(horizontalDirection * moveSpeed * dt,
-        verticalDirection * moveSpeed * dt));
+    // Defineix un factor d'interpolació. Per exemple, 0.1 per un 10% del camí per frame
+    double lerpFactor = interpolationSpeed * dt;
+
+    // Calcula la nova posició com una interpolació lineal entre la posició actual i la targetPosition
+    position =
+        position + (targetPosition - position) * lerpFactor.clamp(0.0, 1.0);
 
     super.update(dt);
   }

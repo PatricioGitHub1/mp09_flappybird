@@ -79,8 +79,6 @@ ws.onMessage = (socket, id, msg) => {
     case "move":
       clientData.x = obj.x
       clientData.y = obj.y
-      clientData.horizontalDirection = obj.horizontalDirection
-      clientData.verticalDirection = obj.verticalDirection
       break
   }
 }
