@@ -1,6 +1,19 @@
 # DAM-WebSocketsGameBucle
 
+## Fer anar el servidor
 
+cd server
+npm install
+npm run dev
+
+## Fer anar el joc
+
+cd game
+create .
+flutter create . --platform linux
+flutter run -d linux
+
+(Obrir diverses finestres del joc, però esperar que cada una hagi iniciat correctament)
 
 ## Nota per Flutter i macOS
 
