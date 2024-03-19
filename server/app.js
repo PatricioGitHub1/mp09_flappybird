@@ -1,20 +1,23 @@
 const express = require('express')
 const gameLoop = require('./utilsGameLoop.js')
 const webSockets = require('./utilsWebSockets.js')
+const dataManager = require('./dataManager.js');
 const debug = true
 
 /*
     WebSockets server, example of messages:
 
     From client to server:
-        - Client init           { "type": "init", "name": "name", "color": "0x000000" }
-        - Player movement       { "type": "move", "x": 0, "y": 0 }
+        - Client init                     { "type": "init", "name": "name", "color": "0x000000" }
+        - Player movement                 { "type": "move", "x": 0, "y": 0 }
 
     From server to client:
-        - Welcome message       { "type": "welcome", "value": "Welcome to the server", "id", "clientId" }
+        - Welcome message                 { "type": "welcome", "value": "Welcome to the server", "id", "clientId" }
+        - Players names in lobby          { type: "players_names", value: [], id:id,}
+        - start game when lobby is full   { type: "game_start", value: {random_numbers:[]}, id: id }
         
     From server to everybody (broadcast):
-        - All clients data      { "type": "data", "data": "clientsData" }
+        - All clients data                { "type": "data", "data": "clientsData" }
 */
 
 var ws = new webSockets()
@@ -22,7 +25,7 @@ var gLoop = new gameLoop()
 
 // Start HTTP server
 const app = express()
-const port = process.env.PORT || 8888
+const port = process.env.PORT || 8889
 
 // Publish static files from 'public' folder
 app.use(express.static('public'))
@@ -50,6 +53,8 @@ ws.init(httpServer, port)
 ws.onConnection = (socket, id) => {
   if (debug) console.log("WebSocket client connected: " + id)
 
+  
+  
   // Saludem personalment al nou client
   socket.send(JSON.stringify({
     type: "welcome",
@@ -65,7 +70,7 @@ ws.onConnection = (socket, id) => {
 }
 
 ws.onMessage = (socket, id, msg) => {
-  if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 32)}...`)
+  if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 100)}...`)
 
   let clientData = ws.getClientData(id)
   if (clientData == null) return
@@ -73,8 +78,15 @@ ws.onMessage = (socket, id, msg) => {
   let obj = JSON.parse(msg)
   switch (obj.type) {
     case "init":
-      clientData.name = obj.name
-      clientData.color = obj.color
+      // Manager de lobbies
+      let startLobby = dataManager.addPlayer(id, obj["name"]);
+      sendPlayersNames(id);
+
+      if (startLobby == true) {
+        sendStartGame(id)
+      }
+      //clientData.name = obj.name
+      //clientData.color = obj.color
       break;
     case "move":
       clientData.x = obj.x
@@ -94,15 +106,42 @@ ws.onClose = (socket, id) => {
   }))
 }
 
+function sendPlayersNames(id) {
+    // Enviem array con nombre jugadores en el lobby
+    let playersIdList = dataManager.playerLobby[id]["players_id"];
+
+    playersIdList.forEach(idClient => {
+      ws.sendMessageToClient(idClient, JSON.stringify({ 
+          type: "players_names", 
+          value: {"names":dataManager.playerLobby[id]["players_name"], "colors":dataManager.playerLobby[id]["playerId_colorId"]}, 
+          id: id,  
+      }));
+    });
+
+}
+
+function sendStartGame(playerId) {
+  console.log("empieza el gameee")
+  let playersIdList = dataManager.playerLobby[playerId]["players_id"];
+  let listaRandom = dataManager.generateIntegerList(500,1,100);
+  playersIdList.forEach(idClient => {
+    ws.sendMessageToClient(idClient, JSON.stringify({ 
+        type: "game_start", 
+        value: {random_numbers:listaRandom}, 
+        id: playerId,  
+    }));
+  });
+}
+
 gLoop.init();
 gLoop.run = (fps) => {
   // Aquest mètode s'intenta executar 30 cops per segon
 
   let clientsData = ws.getClientsData()
-
+  //console.log(dataManager.lobbies);
   // Gestionar aquí la partida, estats i final
   //console.log(clientsData)
 
   // Send game status data to everyone
-  ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))
+  //ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))
 }

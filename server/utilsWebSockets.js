@@ -99,6 +99,15 @@ class Obj {
         }
         return clients;
     }
+
+    // Send a message to a specific websocket client by ID
+    sendMessageToClient(id, message) {
+        this.socketsClients.forEach((metadata, con) => {
+            if (metadata.id === id && con.readyState === WebSocket.OPEN) {
+                con.send(message)
+            }
+        })
+    }
 }
 
 module.exports = Obj
