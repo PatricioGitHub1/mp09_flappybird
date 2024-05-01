@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:cupertino_base/ft_game.dart';
 import 'package:cupertino_base/opponent_bird.dart';
+import 'package:cupertino_base/player_bird.dart';
 import 'package:cupertino_base/utils_websockets.dart';
 import 'package:flame/components.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -17,11 +19,15 @@ class AppData with ChangeNotifier {
   CurrentScreen screen = CurrentScreen.login;
   String startCountdown = "Waiting for players...";
   static late WebSocketsHandler websocket;
-  String nickname = "";
+  static String nickname = "";
   static String player_id = "";
   List<String> lobbyPlayers = [];
+  static late Map<String, dynamic> rawLeaderboard;
+  static late List<Map<String, dynamic>> finalLeaderboard;
   static List<int> random_numbers = [];
   static Map<String, dynamic> colorById = {};
+  static bool isEndGame = false;
+  static bool endgameTick2 = false;
 
   DateTime? lastUpdateTime;
   double serverUpdateInterval = 0;
@@ -37,7 +43,7 @@ class AppData with ChangeNotifier {
 
   void serverMessageHandler(String message) {
     if (kDebugMode) {
-      print("Message received: $message");
+      //print("Message received: $message");
     }
 
     // Processar els missatges rebuts
@@ -78,6 +84,28 @@ class AppData with ChangeNotifier {
         List<String> contador = ["Game starting in...", "3", "2", "1", "GO"];
         startCountdownSequence(contador);
       }
+
+      if (data['type'] == "game_over") {
+        print(data);
+        Map<String, dynamic> playerScore = data['data']['playerScore'];
+        // Sort player scores based on score value
+        List<MapEntry<String, dynamic>> sortedPlayerScores = playerScore.entries
+            .toList()
+          ..sort((a, b) =>
+              (b.value['score'] as int).compareTo(a.value['score'] as int));
+
+        // Create ordered list
+        finalLeaderboard = sortedPlayerScores
+            .map((entry) => {
+                  'id': entry.key,
+                  'score': entry.value['score'],
+                  'nickname': entry.value['nickname'],
+                })
+            .toList();
+
+        print(finalLeaderboard);
+        isEndGame = true;
+      }
     }
   }
 
@@ -97,8 +125,14 @@ class AppData with ChangeNotifier {
     websocket.sendMessage('{"type": "init", "name": "$nickname"}');
   }
 
-  static void playerDied(double x, double y) {
-    websocket.sendMessage('{"type": "died", "x": $x, "y": $y}');
+  static void playerDied(double x, double y, int score) {
+    if (!PlayerBird.alive) {
+      return;
+    }
+    print(
+        '{"type": "died", "x": $x, "y": $y, "nickname":"$nickname", "id":"$player_id", "score":$score}');
+    websocket.sendMessage(
+        '{"type": "died", "x": $x, "y": $y, "nickname":"$nickname", "id":"$player_id", "score":$score}');
   }
 
   void updateOpponents(opponentsData) {
@@ -110,7 +144,7 @@ class AppData with ChangeNotifier {
     lastUpdateTime = now;
     var interpolationSpeed = 1 / serverUpdateInterval;
 
-    print(opponentsData.toString());
+    //print(opponentsData.toString());
     for (var opponentData in opponentsData) {
       final id = opponentData['id'];
       if (FtGame.idPlayerMap.containsKey(id)) {

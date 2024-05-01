@@ -1,5 +1,7 @@
 import 'package:cupertino_base/app_data.dart';
 import 'package:cupertino_base/ft_game.dart';
+import 'package:cupertino_base/ft_gameover.dart';
+import 'package:cupertino_base/ft_leaderboard.dart';
 import 'package:cupertino_base/ft_main_overlay.dart';
 import 'package:cupertino_base/main_menu.dart';
 import 'package:flame/game.dart';
@@ -7,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'waiting_menu.dart';
-
 
 class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
@@ -28,12 +29,13 @@ class AppState extends State<App> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Center(child: Text("FlappyBird : Battle Royale"),) // Set the app bar title
-        ),
+            title: const Center(
+          child: Text("FlappyBird : Battle Royale"),
+        ) // Set the app bar title
+            ),
         body: Consumer<AppData>(
           builder: (context, appData, _) {
             switch (appData.screen) {
-
               case CurrentScreen.login:
                 return MainMenuForm();
 
@@ -45,6 +47,9 @@ class AppState extends State<App> {
                   gameFactory: FtGame.new,
                   overlayBuilderMap: {
                     'MainOverlay': (_, game) => FtMainOverlay(game: game),
+                    'gameOver': (_, game) => GameOverScreen(game: game),
+                    'showLeaderboard': (_, game) =>
+                        LeaderboardScreen(game: game),
                   },
                   initialActiveOverlays: const ['MainOverlay'],
                 );

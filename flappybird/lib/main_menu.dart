@@ -43,7 +43,8 @@ class _MainMenuFormState extends State<MainMenuForm> {
             ),
             keyboardType: TextInputType.number, // Set keyboard type to number
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^[0-9]+$')), // Allow only numbers
+              FilteringTextInputFormatter.allow(
+                  RegExp(r'^[0-9]+$')), // Allow only numbers
             ],
           ),
           SizedBox(height: 20.0),
@@ -57,7 +58,8 @@ class _MainMenuFormState extends State<MainMenuForm> {
           ElevatedButton(
             onPressed: () {
               String ip = _ipController.text;
-              int port = int.tryParse(_portController.text) ?? 0; // Convert to int, default to 0 if invalid input
+              int port = int.tryParse(_portController.text) ??
+                  0; // Convert to int, default to 0 if invalid input
               String nickname = _nicknameController.text;
 
               if (kDebugMode) {
@@ -65,9 +67,9 @@ class _MainMenuFormState extends State<MainMenuForm> {
                 print('Port: $port');
                 print('Nickname: $nickname');
               }
-              
+
               AppData appData = Provider.of<AppData>(context, listen: false);
-              appData.nickname = nickname;
+              AppData.nickname = nickname;
 
               appData.initializeWebSocket(ip, port);
             },

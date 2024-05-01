@@ -2,6 +2,7 @@ import 'package:cupertino_base/app_data.dart';
 import 'package:cupertino_base/configuration.dart';
 import 'package:cupertino_base/ft_game.dart';
 import 'package:cupertino_base/pipe.dart';
+import 'package:cupertino_base/player_bird.dart';
 import 'package:flame/components.dart';
 
 class PipeGroup extends PositionComponent with HasGameRef<FtGame> {
@@ -29,7 +30,7 @@ class PipeGroup extends PositionComponent with HasGameRef<FtGame> {
 
     if (position.x < -20) {
       removeFromParent();
-      //debugPrint("Removed pipe");
+      updateScore();
     }
   }
   /*void updateScore() {
@@ -54,5 +55,13 @@ class PipeGroup extends PositionComponent with HasGameRef<FtGame> {
     int number = AppData.random_numbers[0];
     AppData.random_numbers.removeAt(0);
     return number / 100;
+  }
+
+  void updateScore() {
+    if (PlayerBird.alive) {
+      gameRef.playerBird.score += 1;
+      AppData.websocket.sendMessage(
+          '{"type": "score", "id": "${AppData.player_id}", "score": ${gameRef.playerBird.score}}');
+    }
   }
 }

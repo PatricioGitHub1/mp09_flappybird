@@ -24,6 +24,7 @@ class FtGame extends FlameGame
   final List<FtOpponent> _opponents = [];
   static List<OpponentBird> opponentsBirds = [];
   static Map<String, OpponentBird> idPlayerMap = {};
+  late TextComponent score;
 
   // flappy birdssss
   late PlayerBird playerBird;
@@ -73,9 +74,8 @@ class FtGame extends FlameGame
       idPlayerMap[id] = opp;
     }
 
-    addAll([
-      playerBird = PlayerBird(id: AppData.player_id),
-    ]);
+    addAll(
+        [playerBird = PlayerBird(id: AppData.player_id), score = buildScore()]);
 
     //idPlayerMap[playerBird.id] = playerBird;
 
@@ -86,6 +86,19 @@ class FtGame extends FlameGame
   void update(double dt) {
     super.update(dt);
     interval.update(dt);
+
+    score.text = 'Score: ${playerBird.score}';
+
+    if (AppData.isEndGame) {
+      overlays.remove('gameOver');
+      remove(score);
+      AppData.endgameTick2 = true;
+    }
+
+    if (AppData.endgameTick2) {
+      overlays.add('showLeaderboard');
+      pauseEngine();
+    }
   }
 
   @override
@@ -97,43 +110,15 @@ class FtGame extends FlameGame
     //initializeGame(loadHud: false);
   }
 
-  /*void initializeGame({required bool loadHud}) {
-    // Initialize websocket
-    initializeWebSocket();
+  TextComponent buildScore() {
+    return TextComponent(
+        position: Vector2(size.x / 2, size.y / 2 * 0.2),
+        anchor: Anchor.center,
+        textRenderer: TextPaint(
+          style: const TextStyle(
+              fontSize: 40, fontFamily: 'Game', fontWeight: FontWeight.bold),
+        ));
   }
-
-  void initializeWebSocket() {
-    websocket = WebSocketsHandler();
-    websocket.connectToServer("localhost", 8888, serverMessageHandler);
-  }
-
-  void serverMessageHandler(String message) {
-    if (kDebugMode) {
-      // print("Message received: $message");
-    }
-
-    // Processar els missatges rebuts
-    final data = json.decode(message);
-
-    // Comprovar si 'data' és un Map i si 'type' és igual a 'data'
-    if (data is Map<String, dynamic>) {
-      if (data['type'] == 'welcome') {
-        initPlayer(data['id'].toString());
-      }
-      if (data['type'] == 'data') {
-        var value = data['value'];
-        if (value is List) {
-          updateOpponents(value);
-        }
-      }
-    }
-  }
-
-  static void initPlayer(String id, String nickname) {
-
-    websocket.sendMessage(
-        '{"type": "init", "name": "$randomName", "color": "${colorToHex(playerColor)}"}');
-  }*/
 
   void updateOpponents(List<dynamic> opponentsData) {
     // Crea una llista amb els ID dels oponents actuals

@@ -18,11 +18,12 @@ import 'ft_game.dart';
 class PlayerBird extends SpriteComponent
     with KeyboardHandler, CollisionCallbacks, HasGameReference<FtGame> {
   String id = "";
-  bool alive = true;
-
+  static bool alive = true;
+  int score = 0;
   Vector2 previousPosition = Vector2.zero();
   int previousHorizontalDirection = 0;
   int previousVerticalDirection = 0;
+  late TextComponent nameComponent;
 
   final double moveSpeed = 200;
 
@@ -78,16 +79,18 @@ class PlayerBird extends SpriteComponent
     if (other is OpponentBird) {
       return;
     }
-    print("asdasdasdKJSOIDAOIDNAONDOAD" + other.runtimeType.toString());
-    gameOver();
+    //gameOver();
   }
 
   void gameOver() {
     //game.overlays.add('gameOver');
-    //game.pauseEngine();
 
-    //game.pauseEngine();
-    AppData.playerDied(x, y);
+    if (score - 1 >= 0) {
+      score -= 1;
+    }
+
+    AppData.playerDied(x, y, score);
     alive = false;
+    game.overlays.add('gameOver');
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:cupertino_base/app_data.dart';
 import 'package:cupertino_base/assets.dart';
@@ -14,6 +15,7 @@ class OpponentBird extends SpriteGroupComponent<OpponentSprite>
   Vector2 previousPosition = Vector2.zero();
   int previousHorizontalDirection = 0;
   int previousVerticalDirection = 0;
+  Color color = Color.fromARGB(255, 0, 0, 0);
 
   double moveSpeed = 200;
 
@@ -41,6 +43,19 @@ class OpponentBird extends SpriteGroupComponent<OpponentSprite>
     position = previousPosition;
 
     add(CircleHitbox());
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    // Preparar el Paint amb color i opacitat
+    final paint = Paint()
+      ..colorFilter =
+          ColorFilter.mode(color.withOpacity(0.5), BlendMode.srcATop)
+      ..filterQuality = FilterQuality.high;
+
+    // Renderitzar el sprite amb el Paint personalitzat
+    sprite?.render(canvas, size: size, overridePaint: paint);
   }
 
   @override
