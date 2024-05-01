@@ -22,7 +22,7 @@ function addPlayer(id, name) {
 
     if (Object.keys(lobbies).length === 0) {
         availableLobby = createLobbyId();
-        lobbies[availableLobby] = { "players_id": [], "in_game": 0, "players_name": [], "playerId_colorId": {} };
+        lobbies[availableLobby] = { "players_id": [], "in_game": 0, "players_name": [], "playerId_colorId": {}, "playerScore": {} };
     }
 
     let lobby = lobbies[availableLobby];
@@ -31,6 +31,7 @@ function addPlayer(id, name) {
     lobby.players_name.push(name);
     lobby.in_game += 1;
     lobby["playerId_colorId"][id] = lobby.in_game;
+    lobby.playerScore[id] = { score: 0, nickname: name };
     playerLobby[id] = lobby;
 
     // Esto significa que el lobby esta lleno y se puede comenzar el game

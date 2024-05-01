@@ -70,7 +70,7 @@ ws.onConnection = (socket, id) => {
 }
 
 ws.onMessage = (socket, id, msg) => {
-  if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 100)}...`)
+  //if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 100)}...`)
 
   let clientData = ws.getClientData(id)
   if (clientData == null) return
@@ -92,11 +92,36 @@ ws.onMessage = (socket, id, msg) => {
       clientData.x = obj.x
       clientData.y = obj.y
       break
+    case "score":
+      let lobby = dataManager.playerLobby[id];
+      lobby.playerScore[obj.id].score = obj.score;
+      console.log(JSON.stringify(obj))
+      break
     case "died":
       clientData.x = obj.x
       clientData.y = obj.y
       clientData.alive = false;
+      let lobby1 = dataManager.playerLobby[obj.id];
+      lobby1.playerScore[obj.id].score = obj.score;
+      checkGameStatus(obj.id);
+      //if (debug) console.log(`New message from ${id}:  ${msg.substring(0, 100)}...`)
       break
+  }
+}
+
+async function checkGameStatus(id) {
+  let lobby = dataManager.playerLobby[id];
+  const remaining = lobby.in_game;
+  lobby.in_game = remaining - 1;
+  if (lobby.in_game === 1) {
+    console.log({
+      type: "game_over",
+      data: JSON.stringify(lobby)
+    })
+    ws.broadcast(JSON.stringify({
+      type: "game_over",
+      data: lobby
+    }));
   }
 }
 
@@ -145,7 +170,7 @@ gLoop.run = (fps) => {
   let clientsData = ws.getClientsData()
   //console.log(dataManager.lobbies);
   // Gestionar aquí la partida, estats i final
-  console.log(clientsData)
+  //console.log(clientsData)
 
   // Send game status data to everyone
   ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))
