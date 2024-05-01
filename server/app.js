@@ -53,8 +53,8 @@ ws.init(httpServer, port)
 ws.onConnection = (socket, id) => {
   if (debug) console.log("WebSocket client connected: " + id)
 
-  
-  
+
+
   // Saludem personalment al nou client
   socket.send(JSON.stringify({
     type: "welcome",
@@ -85,12 +85,17 @@ ws.onMessage = (socket, id, msg) => {
       if (startLobby == true) {
         sendStartGame(id)
       }
-      //clientData.name = obj.name
-      //clientData.color = obj.color
+      clientData.name = obj.name
+      clientData.alive = true
       break;
     case "move":
       clientData.x = obj.x
       clientData.y = obj.y
+      break
+    case "died":
+      clientData.x = obj.x
+      clientData.y = obj.y
+      clientData.alive = false;
       break
   }
 }
@@ -107,28 +112,28 @@ ws.onClose = (socket, id) => {
 }
 
 function sendPlayersNames(id) {
-    // Enviem array con nombre jugadores en el lobby
-    let playersIdList = dataManager.playerLobby[id]["players_id"];
+  // Enviem array con nombre jugadores en el lobby
+  let playersIdList = dataManager.playerLobby[id]["players_id"];
 
-    playersIdList.forEach(idClient => {
-      ws.sendMessageToClient(idClient, JSON.stringify({ 
-          type: "players_names", 
-          value: {"names":dataManager.playerLobby[id]["players_name"], "colors":dataManager.playerLobby[id]["playerId_colorId"]}, 
-          id: id,  
-      }));
-    });
+  playersIdList.forEach(idClient => {
+    ws.sendMessageToClient(idClient, JSON.stringify({
+      type: "players_names",
+      value: { "names": dataManager.playerLobby[id]["players_name"], "colors": dataManager.playerLobby[id]["playerId_colorId"] },
+      id: id,
+    }));
+  });
 
 }
 
 function sendStartGame(playerId) {
   console.log("empieza el gameee")
   let playersIdList = dataManager.playerLobby[playerId]["players_id"];
-  let listaRandom = dataManager.generateIntegerList(500,1,100);
+  let listaRandom = dataManager.generateIntegerList(500, 1, 100);
   playersIdList.forEach(idClient => {
-    ws.sendMessageToClient(idClient, JSON.stringify({ 
-        type: "game_start", 
-        value: {random_numbers:listaRandom}, 
-        id: playerId,  
+    ws.sendMessageToClient(idClient, JSON.stringify({
+      type: "game_start",
+      value: { random_numbers: listaRandom },
+      id: playerId,
     }));
   });
 }
@@ -140,8 +145,29 @@ gLoop.run = (fps) => {
   let clientsData = ws.getClientsData()
   //console.log(dataManager.lobbies);
   // Gestionar aquí la partida, estats i final
-  //console.log(clientsData)
+  console.log(clientsData)
 
   // Send game status data to everyone
-  //ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))
+  ws.broadcast(JSON.stringify({ type: "data", value: clientsData }))
+
+  // iteramos por lobbies para enviar los datos de los jugadores de los lobbies entre ellos
+  //console.log(dataManager.lobbies)
+
+  /*let clientsIds = ws.getClientsIds();
+  for (const clientId in clientsIds) {
+    let clientData = ws.getClientData(clientId);
+
+    let lobbyId = dataManager.playerLobby[clientId];
+    let lobby = dataManager.lobbies[lobbyId];
+
+    if (lobby == null) {
+      continue;
+    }
+
+    for (const playerInLobby in lobby["player_id"]) {
+      let message = JSON.stringify({ type: "data", value: clientData });
+      ws.sendMessageToClient(playerInLobby, message);
+      console.log("se envio mensajes", message);
+    }
+  }*/
 }

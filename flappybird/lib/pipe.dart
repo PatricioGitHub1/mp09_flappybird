@@ -42,9 +42,9 @@ class Pipe extends SpriteComponent with HasGameRef<FtGame> {
         break;
       }
     }
-    
+
     size = Vector2(50, height);
-    
+
     switch (pipePosition) {
       case PipePosition.up:
         position.y = 0;
@@ -56,6 +56,6 @@ class Pipe extends SpriteComponent with HasGameRef<FtGame> {
         break;
     }
 
-    //add(RectangleHitbox());
+    add(RectangleHitbox());
   }
 }

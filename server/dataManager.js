@@ -22,7 +22,7 @@ function addPlayer(id, name) {
 
     if (Object.keys(lobbies).length === 0) {
         availableLobby = createLobbyId();
-        lobbies[availableLobby] = {"players_id":[], "in_game":0, "players_name":[], "playerId_colorId":{}};
+        lobbies[availableLobby] = { "players_id": [], "in_game": 0, "players_name": [], "playerId_colorId": {} };
     }
 
     let lobby = lobbies[availableLobby];
@@ -37,14 +37,14 @@ function addPlayer(id, name) {
     if (lobbies[availableLobby].in_game >= 2) {
         completedLobbyId = availableLobby;
         availableLobby = createLobbyId();
-        lobbies[availableLobby] = {"players_id":[], "in_game":0, "players_name":[], "playerId_colorId":{}};
+        lobbies[availableLobby] = { "players_id": [], "in_game": 0, "players_name": [], "playerId_colorId": {} };
         newGame = true;
     }
 
     return newGame;
 }
 
-function generateIntegerList(size,min ,max) {
+function generateIntegerList(size, min, max) {
     let randomIntegers = [];
     for (var i = 0; i < size; i++) {
         randomIntegers.push(Math.floor(Math.random() * (max - min + 1)) + min);
@@ -54,8 +54,8 @@ function generateIntegerList(size,min ,max) {
 }
 
 module.exports = {
-  lobbies,
-  playerLobby,
-  addPlayer,
-  generateIntegerList
+    lobbies,
+    playerLobby,
+    addPlayer,
+    generateIntegerList
 };

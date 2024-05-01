@@ -1,8 +1,10 @@
 import 'dart:ui';
 
+import 'package:cupertino_base/app_data.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import 'ft_game.dart';
 
@@ -29,7 +31,7 @@ class FtPlayer extends SpriteComponent
     size = Vector2.all(64);
     add(CircleHitbox());
   }
-// bombardeen marruecos
+
   @override
   bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     // Modificar la direcció horitzontal basada en les tecles dreta i esquerra

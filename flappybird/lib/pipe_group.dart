@@ -3,23 +3,22 @@ import 'package:cupertino_base/configuration.dart';
 import 'package:cupertino_base/ft_game.dart';
 import 'package:cupertino_base/pipe.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class PipeGroup extends PositionComponent with HasGameRef<FtGame> {
   PipeGroup();
 
   @override
   Future<void> onLoad() async {
-    
     position.x = gameRef.size.x;
     final heightt = gameRef.size.y;
-    final spacing = 100 + getNumberThenDelete() * (heightt / 4);
+    final spacing = 300 + getNumberThenDelete() * (heightt / 4);
     final centerY = spacing + getNumberThenDelete() * (heightt - spacing);
 
     addAll([
-        Pipe(pipePosition: PipePosition.up, height: centerY - spacing / 2),
-        Pipe(pipePosition: PipePosition.down, height: heightt - (centerY + spacing / 2))
+      Pipe(pipePosition: PipePosition.up, height: centerY - spacing / 2),
+      Pipe(
+          pipePosition: PipePosition.down,
+          height: heightt - (centerY + spacing / 2))
     ]);
   }
 
@@ -30,7 +29,7 @@ class PipeGroup extends PositionComponent with HasGameRef<FtGame> {
 
     if (position.x < -20) {
       removeFromParent();
-      debugPrint("Removed pipe");
+      //debugPrint("Removed pipe");
     }
   }
   /*void updateScore() {
@@ -54,6 +53,6 @@ class PipeGroup extends PositionComponent with HasGameRef<FtGame> {
   static double getNumberThenDelete() {
     int number = AppData.random_numbers[0];
     AppData.random_numbers.removeAt(0);
-    return number/100;
+    return number / 100;
   }
 }

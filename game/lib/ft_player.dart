@@ -29,7 +29,7 @@ class FtPlayer extends SpriteComponent
     size = Vector2.all(64);
     add(CircleHitbox());
   }
-// bombardeen marruecos
+
   @override
   bool onKeyEvent(RawKeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     // Modificar la direcció horitzontal basada en les tecles dreta i esquerra

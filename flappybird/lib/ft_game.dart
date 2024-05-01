@@ -1,13 +1,13 @@
-import 'dart:convert';
 import 'dart:math';
 
+import 'package:cupertino_base/app_data.dart';
 import 'package:cupertino_base/configuration.dart';
+import 'package:cupertino_base/opponent_bird.dart';
 import 'package:cupertino_base/pipe_group.dart';
 import 'package:cupertino_base/player_bird.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'ft_opponent.dart';
@@ -22,6 +22,8 @@ class FtGame extends FlameGame
   late WebSocketsHandler websocket;
   FtPlayer? _player;
   final List<FtOpponent> _opponents = [];
+  static List<OpponentBird> opponentsBirds = [];
+  static Map<String, OpponentBird> idPlayerMap = {};
 
   // flappy birdssss
   late PlayerBird playerBird;
@@ -59,10 +61,23 @@ class FtGame extends FlameGame
     }
 
     camera.viewfinder.anchor = Anchor.topLeft;
-    
+
+    for (String id in AppData.colorById.keys) {
+      if (id == AppData.player_id) {
+        continue;
+      }
+      OpponentBird opp = OpponentBird(id: id);
+      opponentsBirds.add(opp);
+      add(opp);
+
+      idPlayerMap[id] = opp;
+    }
+
     addAll([
-      playerBird = PlayerBird(),
+      playerBird = PlayerBird(id: AppData.player_id),
     ]);
+
+    //idPlayerMap[playerBird.id] = playerBird;
 
     interval.onTick = () => add(PipeGroup());
   }

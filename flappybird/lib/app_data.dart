@@ -1,29 +1,30 @@
 import 'dart:convert';
 
 import 'package:cupertino_base/ft_game.dart';
+import 'package:cupertino_base/opponent_bird.dart';
 import 'package:cupertino_base/utils_websockets.dart';
+import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/single_child_widget.dart';
 
-enum CurrentScreen {
-    login,
-    waiting,
-    playing
-}
+enum CurrentScreen { login, waiting, playing }
 
-enum PipePosition {
-  up,
-  down
-}
+enum PipePosition { up, down }
+
+enum OpponentSprite { alive, dead }
 
 class AppData with ChangeNotifier {
   CurrentScreen screen = CurrentScreen.login;
   String startCountdown = "Waiting for players...";
-  late WebSocketsHandler websocket;
+  static late WebSocketsHandler websocket;
   String nickname = "";
   static String player_id = "";
   List<String> lobbyPlayers = [];
-  static List<int> random_numbers  = [];
+  static List<int> random_numbers = [];
   static Map<String, dynamic> colorById = {};
+
+  DateTime? lastUpdateTime;
+  double serverUpdateInterval = 0;
 
   void forceNotifyListeners() {
     super.notifyListeners();
@@ -31,7 +32,7 @@ class AppData with ChangeNotifier {
 
   void initializeWebSocket(String ip, int port) {
     websocket = WebSocketsHandler();
-    websocket.connectToServer(ip, port , serverMessageHandler);
+    websocket.connectToServer(ip, port, serverMessageHandler);
   }
 
   void serverMessageHandler(String message) {
@@ -54,8 +55,14 @@ class AppData with ChangeNotifier {
       if (data['type'] == 'data') {
         var value = data['value'];
         if (value is List) {
-          //updateOpponents(value);
+          updateOpponents(value);
         }
+        /*
+        print(data);
+        if (FtGame.idPlayerMap.containsKey(data['id']) &&
+            data['id'] != player_id) {
+          updateOpponents(data);
+        }*/
       }
 
       if (data['type'] == 'players_names') {
@@ -85,11 +92,50 @@ class AppData with ChangeNotifier {
     screen = CurrentScreen.playing;
     notifyListeners();
   }
-  
-  void initPlayer(String nickname) {
 
-    websocket.sendMessage(
-        '{"type": "init", "name": "$nickname"}');
+  void initPlayer(String nickname) {
+    websocket.sendMessage('{"type": "init", "name": "$nickname"}');
   }
 
+  static void playerDied(double x, double y) {
+    websocket.sendMessage('{"type": "died", "x": $x, "y": $y}');
+  }
+
+  void updateOpponents(opponentsData) {
+    DateTime now = DateTime.now();
+    if (lastUpdateTime != null) {
+      serverUpdateInterval =
+          now.difference(lastUpdateTime!).inMilliseconds / 1000.0;
+    }
+    lastUpdateTime = now;
+    var interpolationSpeed = 1 / serverUpdateInterval;
+
+    print(opponentsData.toString());
+    for (var opponentData in opponentsData) {
+      final id = opponentData['id'];
+      if (FtGame.idPlayerMap.containsKey(id)) {
+        OpponentBird opponent = FtGame.idPlayerMap[id]!;
+
+        double clientX = -100.0;
+        double clientY = -100.0;
+
+        if (opponentData['x'] != null) {
+          clientX = opponentData['x'].toDouble();
+        }
+        if (opponentData['y'] != null) {
+          clientY = opponentData['y'].toDouble();
+        }
+
+        if (opponentData['alive'] == false) {
+          clientX = -20.0;
+          opponent.current = OpponentSprite.dead;
+          opponent.moveSpeed = 30;
+          FtGame.idPlayerMap.remove(id);
+        }
+
+        opponent.interpolationSpeed = interpolationSpeed;
+        opponent.targetPosition = Vector2(clientX, clientY);
+      }
+    }
+  }
 }

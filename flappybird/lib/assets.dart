@@ -1,15 +1,16 @@
 class Assets {
- static const bluebird = 'bluebird.png';
- static const multicolorbird = 'multicolorbird.png';
- static const redbird = 'redbird.png';
- static const yellowbird = 'yellowbird.png';
- static const pipe = "pipe.png";
- static const rotated_pipe = "pipe_rotated.png";
+  static const bluebird = 'bluebird.png';
+  static const greenbird = 'greenbird.png';
+  static const redbird = 'redbird.png';
+  static const orangebird = 'orangebird.png';
+  static const pipe = "pipe.png";
+  static const rotated_pipe = "pipe_rotated.png";
+  static const explosion = "boom.png";
 
- static final Map<int, String> birdMap = {
+  static final Map<int, String> birdMap = {
     1: bluebird,
-    2: yellowbird,
-    3: redbird,
-    4: multicolorbird,
+    2: redbird,
+    3: orangebird,
+    4: greenbird,
   };
 }
