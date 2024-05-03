@@ -37,9 +37,13 @@ class PlayerBird extends SpriteComponent
     size = Vector2.all(64);
 
     //size = Vector2(40, 50);
-    previousPosition = Vector2(50, game.size.y / 2 - size.y / 2);
+    double textPosY = position.y - 20;
+    TextComponent tagname =
+        TextComponent(text: AppData.nickname, position: Vector2(50, textPosY));
+
     position = previousPosition;
 
+    add(tagname);
     add(CircleHitbox());
   }
 
@@ -79,7 +83,7 @@ class PlayerBird extends SpriteComponent
     if (other is OpponentBird) {
       return;
     }
-    //gameOver();
+    gameOver();
   }
 
   void gameOver() {
